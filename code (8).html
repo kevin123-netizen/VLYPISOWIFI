@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VLY PisoWiFi — Admin</title>
+    <style>
+        body {
+            font-family: system-ui, Arial;
+            padding: 12px;
+            max-width: 900px;
+            margin: auto;
+        }
+        .card {
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+        }
+        input, button, select {
+            padding: 8px;
+            margin: 6px 0;
+            width: 100%;
+        }
+        .row {
+            display: flex;
+            gap: 8px;
+        }
+        .col {
+            flex: 1;
+        }
+        pre {
+            background: #f7f7f7;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h2>VLY PisoWiFi — Admin demo</h2>
+    
+    <!-- Login Section -->
+    <div id="login" class="card">
+        <h3>Login</h3>
+        <input id="username" placeholder="username">
+        <input id="password" placeholder="password" type="password">
+        <button id="btnLogin">Login</button>
+        <pre id="loginMsg"></pre>
+    </div>
+
+    <!-- Sign Up Section -->
+    <div id="signup" class="card">
+        <h3>Sign Up</h3>
+        <input id="newUser  " placeholder="username">
+        <input id="newPass" placeholder="password" type="password">
+        <select id="newRole">
+            <option value="operator">operator</option>
+            <option value="admin">admin</option>
+        </select>
+        <button id="btnSignUp">Sign Up</button>
+        <pre id="signupMsg"></pre>
+    </div>
+
+    <!-- Admin UI Section -->
+    <div id="adminUI" style="display:none">
+        <div class="card">
+            <h3>Your Activation License Code</h3>
+            <pre id="activationCode"></pre>
+        </div>
+        <div class="card">
+            <h3>Create user</h3>
+            <input id="newUser  Admin" placeholder="username">
+            <input id="newPassAdmin" placeholder="password">
+            <select id="newRoleAdmin">
+                <option value="operator">operator</option>
+                <option value="admin">admin</option>
+            </select>
+            <button id="btnCreateUser  ">Create</button>
+            <pre id="createUser  Msg"></pre>
+        </div>
+        <div class="card">
+            <h3>Generate license</h3>
+            <input id="licTo" placeholder="issued to (name or email)">
+            <input id="licDevices" type="number" value="1" min="1">
+            <button id="btnGen">Generate</button>
+            <pre id="genResult"></pre>
+        </div>
+        <div class="card">
+            <h3>Existing licenses</h3>
+            <button id="btnRefresh">Refresh</button>
+            <pre id="licensesList"></pre>
+        </div>
+        <button id="btnLogout">Logout</button>
+    </div>
+
+    <script>
+        const apiBase = '';
+        let token = null;
+
+        function setToken(t) {
+            token = t;
+            if (t) {
+                localStorage.setItem('vly_token', t);
+            } else {
+                localStorage.removeItem('vly_token');
+            }
+        }
+
+        async function api(path, opts = {}) {
+            opts.headers = opts.headers || {};
+            opts.headers['Content-Type'] = 'application/json';
+            if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+            const res = await fetch('/api' + path, opts);
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) throw j;
+            return j;
+        }
+
+        // Login Functionality
+        document.getElementById('btnLogin').onclick = async () => {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            try {
+                const r = await api('/login', { method: 'POST', body: JSON.stringify({ username: u, password: p }) });
+                setToken(r.token);
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('signup').style.display = 'none';
+                document.getElementById('adminUI').style.display = 'block';
+                loadLicenses();
+                loadActivationCode(); // Load activation code after login
+            } catch (e) {
+                document.getElementById('loginMsg').textContent = JSON.stringify(e);
+            }
+        }
+
+        // Sign Up Functionality
+        document.getElementById('btnSignUp').onclick = async () => {
+            const u = document.getElementById('newUser  ').value;
+            const p = document.getElementById('newPass').value;
+            const role = document.getElementById('newRole').value;
+            try {
+                const r = await api('/signup', { method: 'POST', body: JSON.stringify({ username: u, password: p, role }) });
+                document.getElementById('signupMsg').textContent = 'Account created: ' + JSON.stringify(r);
+                document.getElementById('newUser  ').value = '';
+                document.getElementById('newPass').value = '';
+            } catch (e) {
+                document.getElementById('signupMsg').textContent = JSON.stringify(e);
+            }
+        }
+
+        // Load Activation Code Functionality
+        async function loadActivationCode() {
+            try {
+                const r = await api('/activation-code'); // Fetch the activation code
+                document.getElementById('activationCode').textContent = r.code; // Display the activation code
+            } catch (e) {
+                document.getElementById('activationCode').textContent = 'Error loading activation code: ' + JSON.stringify(e);
+            }
+        }
+
+        // Create User Functionality (Admin)
+        document.getElementById('btnCreateUser  ').onclick = async () => {
+            try {
+                const u = document.getElementById('newUser  Admin').value;
+                const p = document.getElementById('newPassAdmin').value;
+                const role = document.getElementById('newRoleAdmin').value;
+                const r = await api('/users', { method: 'POST', body: JSON.stringify({ username: u, password: p, role }) });
+                document.getElementById('createUser  Msg').textContent = 'Created: ' + JSON.stringify(r);
+                document.getElementById('newUser  Admin').value = '';
+                document.getElementById('newPassAdmin').value = '';
+            } catch (e) {
+                document.getElementById('createUser  Msg').textContent = JSON.stringify(e);
+            }
+        }
+
+        // Generate License Functionality
+        document.getElementById('btnGen').onclick = async () => {
+            try {
+                const issued_to = document.getElementById('licTo').value;
+                const max_devices = parseInt(document.getElementById('licDevices').value || '1');
+                const r = await api('/licenses', { method: 'POST', body: JSON.stringify({ issued_to, max_devices }) });
+                document.getElementById('genResult').textContent = JSON.stringify(r, null, 2);
+                loadLicenses();
+            } catch (e) {
+                document.getElementById('genResult').textContent = JSON.stringify(e);
+            }
+        }
+
+        // Load Licenses Functionality
+        async function loadLicenses() {
+            try {
+                const r = await api('/licenses');
+                document.getElementById('licensesList').textContent = JSON.stringify(r, null, 2);
+            } catch (e) {
+                document.getElementById('licensesList').textContent = JSON.stringify(e);
+            }
+        }
+
+        document.getElementById('btnRefresh').onclick = loadLicenses;
+
+        // Logout Functionality
+        document.getElementById('btnLogout').onclick = () => {
+            setToken(null);
+            document.getElementById('login').style.display = 'block';
+            document.getElementById('signup').style.display = 'block';
+            document.getElementById('adminUI').style.display = 'none';
+        }
+
+        // Check for existing token
+        (function () {
+            const t = localStorage.getItem('vly_token');
+            if (t) {
+                token = t;
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('signup').style.display = 'none';
+                document.getElementById('adminUI').style.display = 'block';
+                loadLicenses();
+                loadActivationCode(); // Load activation code if already logged in
+            }
+        })();
+    </script>
+</body>
+</html>
