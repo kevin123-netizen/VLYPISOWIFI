@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VLY PisoWiFi — Admin</title>
+  <style>
+    body {
+      font-family: system-ui, Arial;
+      margin: 0;
+      background: #fff;
+      color: #333;
+      scroll-behavior: smooth;
+      transition: background 0.3s, color 0.3s;
+    }
+    /* Dark mode */
+    body.dark { background: #121212; color: #eee; }
+    body.dark .navbar { background: #1e1e1e; border-bottom: 1px solid #444; }
+    body.dark .sidebar { background: #1e1e1e; border-right: 1px solid #444; }
+    body.dark .sidebar a { color: #eee; border-bottom: 1px solid #333; }
+    body.dark .sidebar a:hover { background: #333; }
+    body.dark .card { background: #1e1e1e; border: 1px solid #444; color: #eee; }
+    body.dark input, body.dark select, body.dark button { background: #222; border: 1px solid #555; color: #eee; }
+    body.dark button { background: #444; }
+    body.dark button:hover { background: #666; }
+    body.dark pre { background: #222; color: #eee; }
+    body.dark .feature-card { background: #1e1e1e; border: 1px solid #444; color: #eee; }
+    body.dark .feature-card p { color: #ccc; }
+    body.dark .feature-card a { color: #4da3ff; }
+    body.dark .hero p { color: #aaa; }
+    /* Navbar */.navbar { display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #ddd; padding: 12px 16px; position: sticky; top: 0; z-index: 1000; }
+    .navbar h1 { margin: 0; font-size: 18px; font-weight: bold; }
+    .menu-btn { font-size: 24px; background: none; border: none; cursor: pointer; }
+    .dark-toggle { background: none; border: 1px solid #ccc; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    /* Sidebar */
+    .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #fff; border-right: 1px solid #ddd; box-shadow: 2px 0 5px rgba(0,0,0,0.1); transition: left 0.3s ease; padding-top: 60px; z-index: 2000; }
+    .sidebar.active { left: 0; }
+    .sidebar a { display: block; padding: 12px 20px; color: #333; text-decoration: none; border-bottom: 1px solid #f0f0f0; }
+    .sidebar a:hover { background: #f9f9f9; }
+    /* Card */.card { border: 1px solid #ddd; background: #fff; padding: 16px; margin: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    input, button, select { padding: 8px; margin: 6px 0; width: 100%; border: 1px solid #ccc; border-radius: 4px; }
+    button {
+  cursor: pointer;
+  background: #0056b3;   /* darker default */
+  color: #fff;
+  border: none;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: background 0.3s, transform 0.2s;
+}
+button:hover {
+  background: #003d80;   /* even darker */
+  transform: scale(1.03);
+}
+body.dark button {
+  background: #333;
+  color: #fff;
+}
+body.dark button:hover {
+  background: #111;
+}
+    button:hover { background: #0056b3; }
+    pre { background: #f7f7f7; padding: 8px; border-radius: 4px; }
+    /* Home Section */.home-section { padding: 40px 20px; text-align: center; }
+    .hero { margin-bottom: 40px; }
+    .hero h1 { font-size: 2.2em; margin-bottom: 10px; }
+    .hero p { font-size: 1.1em; color: #555; }
+    .hero .cta-btn { display: inline-block; margin-top: 15px; padding: 12px 24px; background: #007bff; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; }
+    .hero .cta-btn:hover { background: #0056b3; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    .feature-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .feature-card h3 { margin-top: 0; }
+    .feature-card p { color: #666; margin: 10px 0; }
+    .feature-card a { font-weight: bold; color: #007bff; text-decoration: none; }
+    /* Footer */footer { text-align: center; padding: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666; }
+    body.dark footer { border-top: 1px solid #444; color: #aaa; }
+  </style>
+</head>
+<body>
+  <div class="navbar"><button class="menu-btn" onclick="toggleMenu()">☰</button><h1>VLY PisoWiFi</h1><button class="dark-toggle" onclick="toggleDarkMode()">🌙 Dark</button></div>
+  <div id="sidebar" class="sidebar"><a href="#home" onclick="showHome(); closeMenu()">Home</a><a href="#login" onclick="showLogin(); closeMenu()">Login</a><a href="#signup" onclick="showLogin(); closeMenu()">Register</a><a href="#buyLicense" onclick="showAdmin(); closeMenu()">Buy License</a></div>
+  <div id="home" class="home-section"><div class="hero"><h1>Welcome to VLY PisoWiFi</h1><p>Your fast, secure, and affordable prepaid internet solution.</p><a href="#buyLicense" class="cta-btn" onclick="showAdmin()">Buy a License</a></div><div class="features"><div class="feature-card"><h3>💳 Easy Payments</h3><p>Affordable prepaid WiFi for everyone.</p></div><div class="feature-card"><h3>⚡ Fast Internet</h3><p>Enjoy smooth browsing and streaming.</p></div><div class="feature-card"><h3>🔒 Secure Access</h3><p>Safe login and account management.</p></div><div class="feature-card"><h3>📊 Admin Control</h3><p>Manage users, licenses, and reports.</p></div></div></div>
+  <div id="authSection" style="display:none"><div id="login" class="card"><h3>Login</h3><input id="username" placeholder="username"><input id="password" placeholder="password" type="password"><button id="btnLogin">Login</button><pre id="loginMsg"></pre></div><div id="signup" class="card"><h3>Sign Up</h3><input id="newUser" placeholder="username"><input id="newPass" placeholder="password" type="password"><select id="newRole"><option value="operator">operator</option><option value="admin">admin</option></select><button id="btnSignUp">Sign Up</button><pre id="signupMsg"></pre></div></div>
+  <div id="adminUI" style="display:none"><div class="card"><h3>Your Activation License Code</h3><pre id="activationCode"></pre></div><div class="card"><h3>Create user</h3><input id="newUserAdmin" placeholder="username"><input id="newPassAdmin" placeholder="password"><select id="newRoleAdmin"><option value="operator">operator</option><option value="admin">admin</option></select><button id="btnCreateUser">Create</button><pre id="createUserMsg"></pre></div><div id="buyLicense" class="card"><h3>Generate license</h3><input id="licTo" placeholder="issued to (name or email)"><input id="licDevices" type="number" value="1" min="1"><button id="btnGen">Generate</button><pre id="genResult"></pre></div><div class="card"><h3>Existing licenses</h3><button id="btnRefresh">Refresh</button><pre id="licensesList"></pre></div><div class="card"><h3>Download Portal</h3><button id="btnDownload">Download Portal</button></div><button id="btnLogout">Logout</button></div>
+  <footer>© 2025 VLY PisoWiFi | Powered by VoloyPlatform</footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script>
+    const apiBase = "/api";
+    function toggleMenu(){ document.getElementById("sidebar").classList.toggle("active"); }
+    function closeMenu(){ document.getElementById("sidebar").classList.remove("active"); }
+    function toggleDarkMode(){ document.body.classList.toggle("dark"); document.querySelector(".dark-toggle").textContent=document.body.classList.contains("dark")?"☀️ Light":"🌙 Dark"; }
+    function showHome(){ document.getElementById("home").style.display="block"; document.getElementById("authSection").style.display="none"; document.getElementById("adminUI").style.display="none"; }
+    function showLogin(){ document.getElementById("home").style.display="none"; document.getElementById("authSection").style.display="block"; document.getElementById("adminUI").style.display="none"; }
+    function showAdmin(){ document.getElementById("home").style.display="none"; document.getElementById("authSection").style.display="none"; document.getElementById("adminUI").style.display="block"; }
+    let token=null;function setToken(t){token=t;if(t){localStorage.setItem('vly_token',t);}else{localStorage.removeItem('vly_token');}}
+    async function api(path,opts={}){opts.headers=opts.headers||{};opts.headers['Content-Type']='application/json';if(token)opts.headers['Authorization']='Bearer '+token;const res=await fetch(apiBase+path,opts);const j=await res.json().catch(()=>({}));if(!res.ok)throw j;return j;}
+    document.getElementById('btnLogin').onclick=async()=>{const u=document.getElementById('username').value;const p=document.getElementById('password').value;try{const r=await api('/login',{method:'POST',body:JSON.stringify({username:u,password:p})});setToken(r.token);showAdmin();loadLicenses();loadActivationCode();}catch(e){document.getElementById('loginMsg').textContent=JSON.stringify(e);}}
+    document.getElementById('btnSignUp').onclick=async()=>{const u=document.getElementById('newUser').value;const p=document.getElementById('newPass').value;const role=document.getElementById('newRole').value;try{const r=await api('/signup',{method:'POST',body:JSON.stringify({username:u,password:p,role})});document.getElementById('signupMsg').textContent='Account created: '+JSON.stringify(r);}catch(e){document.getElementById('signupMsg').textContent=JSON.stringify(e);}}
+    async function loadActivationCode(){try{const r=await api('/activation-code');document.getElementById('activationCode').textContent=r.code;}catch(e){document.getElementById('activationCode').textContent='Error: '+JSON.stringify(e);}}
+    document.getElementById('btnCreateUser').onclick=async()=>{try{const u=document.getElementById('newUserAdmin').value;const p=document.getElementById('newPassAdmin').value;const role=document.getElementById('newRoleAdmin').value;const r=await api('/users',{method:'POST',body:JSON.stringify({username:u,password:p,role})});document.getElementById('createUserMsg').textContent='Created: '+JSON.stringify(r);}catch(e){document.getElementById('createUserMsg').textContent=JSON.stringify(e);}}
+    document.getElementById('btnGen').onclick=async()=>{try{const issued_to=document.getElementById('licTo').value;const max_devices=parseInt(document.getElementById('licDevices').value||'1');const r=await api('/licenses',{method:'POST',body:JSON.stringify({issued_to,max_devices})});document.getElementById('genResult').textContent=JSON.stringify(r,null,2);loadLicenses();}catch(e){document.getElementById('genResult').textContent=JSON.stringify(e);}}
+    async function loadLicenses(){try{const r=await api('/licenses');document.getElementById('licensesList').textContent=JSON.stringify(r,null,2);}catch(e){document.getElementById('licensesList').textContent=JSON.stringify(e);}}
+    document.getElementById('btnRefresh').onclick=loadLicenses;
+    document.getElementById('btnDownload').onclick=async()=>{try{const r=await api('/licenses');const zip=new JSZip();zip.file("readme.txt","Welcome to VLY PisoWiFi Portal!\\nEnjoy your service.");zip.file("license_info.json",JSON.stringify(r,null,2));zip.generateAsync({type:"blob"}).then(function(content){const a=document.createElement('a');a.href=URL.createObjectURL(content);a.download="portal.zip";a.click();});}catch(e){alert("Error creating portal: "+JSON.stringify(e));}}
+    document.getElementById('btnLogout').onclick=()=>{setToken(null);showHome();}
+    (function(){const t=localStorage.getItem('vly_token');if(t){token=t;showAdmin();loadLicenses();loadActivationCode();}else{showHome();}})();
+  </script>
+</body>
+</html>
