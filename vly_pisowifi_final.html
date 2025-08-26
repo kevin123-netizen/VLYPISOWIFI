@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>VLY PisoWiFi — Auth &amp; License</title>
+<style>
+    :root{
+      --primary:#0056b3;
+      --primary-dark:#003d80;
+      --bg:#ffffff;
+      --fg:#222222;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    a{color:var(--primary);text-decoration:none}
+    /* Top bar */
+    .navbar{position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 16px;background:#f7f7f9;border-bottom:1px solid #e6e6ee}
+    .brand{font-weight:700}
+    .nav-links{display:flex;gap:8px;flex-wrap:wrap}
+    .nav-links a{padding:8px 12px;border-radius:8px}
+    .nav-links a.active{background:var(--primary);color:#fff}
+    /* Buttons */
+    button{cursor:pointer;background:var(--primary);color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700;box-shadow:0 2px 5px rgba(0,0,0,.15);transition:background .25s,transform .2s}
+    button:hover{background:var(--primary-dark);transform:translateY(-1px)}
+    /* Layout sections */
+    section{display:none;opacity:0;transition:opacity .45s ease}
+    section.active{display:block;opacity:1}
+    /* Hero */
+    .hero{padding:48px 16px;text-align:center}
+    .hero h2{margin:0 0 8px 0}
+    .hero p{margin:0 0 20px 0;color:#555}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:24px auto;max-width:1000px;padding:0 16px}
+    .card{background:#fff;border:1px solid #eee;border-radius:12px;padding:18px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+    /* Auth centering */
+    #authSection{min-height:calc(100vh - 120px);display:none;align-items:center;justify-content:center}
+    #authSection .panel{width:100%;max-width:380px}
+    #authSection .panel .card{transform:translateX(30px);opacity:0;transition:all .45s ease}
+    #authSection .panel .card.active{transform:none;opacity:1}
+    #authSection input,#authSection select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:8px}
+    #authSection button{width:100%;margin-top:12px}
+    #authSection .switch{margin-top:10px;text-align:center}
+    /* Admin */
+    #adminUI{max-width:1100px;margin:24px auto;padding:0 16px}
+    .stack{display:grid;gap:12px}
+    /* Notif bar */
+    #notif{display:none;position:fixed;top:0;left:0;right:0;z-index:3000;text-align:center;padding:12px;font-weight:700;border-radius:0 0 8px 8px;background:#d4edda;color:#155724;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  
+    .card h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.2em;
+    }
+    .card-icon {
+      font-size: 1.4em;
+      color: var(--primary);
+    }
+    </style>
+</head>
+<body>
+<div id="notif"></div>
+<div class="navbar">
+<div class="brand">VLY PisoWiFi</div>
+<div class="nav-links">
+<a href="#" id="btnHome" onclick="showHome()">Home</a>
+<a href="#" id="btnLogin" onclick="showLogin()">Login</a>
+<a href="#" id="btnSignup" onclick="showSignup()">Sign Up</a>
+<a href="#" id="btnBuy" onclick="showAdmin()">Buy License</a>
+<a href="#" id="btnLogout" onclick="logout()" style="display:none">Logout</a>
+</div>
+</div>
+<!-- HOME -->
+<section class="active" id="home">
+<div class="hero">
+<h2>Welcome to PisoWiFi Admin</h2>
+<p>Manage accounts and generate license codes securely.</p>
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<button onclick="showAdmin()">Buy a License</button>
+<button onclick="showLogin()">Login</button>
+<button onclick="showSignup()">Sign Up</button>
+</div>
+</div>
+<div class="grid"><div class="card"><h3><span class="card-icon">⚡</span>Fast Internet</h3><p>Enjoy reliable high-speed connectivity anytime.</p></div><div class="card"><h3><span class="card-icon">🔒</span>Secure Access</h3><p>Protect your network with token-based authentication.</p></div><div class="card"><h3><span class="card-icon">🛠️</span>Admin Control</h3><p>Manage users, licenses, and settings with ease.</p></div><div class="card"><h3><span class="card-icon">💳</span>Easy Payments</h3><p>Convenient and hassle-free license purchasing.</p></div></div>
+</section>
+<!-- AUTH (separate panels) -->
+<section id="authSection">
+<div class="panel">
+<div class="card" id="login">
+<h3 style="text-align:center;margin-top:0">Login</h3>
+<input id="username" placeholder="Username"/>
+<input id="password" placeholder="Password" type="password"/>
+<button id="btnDoLogin">Login</button>
+<div class="switch">Don’t have an account? <a href="#" onclick="showSignup()">Sign Up</a></div>
+</div>
+<div class="card" id="signup" style="display:none">
+<h3 style="text-align:center;margin-top:0">Sign Up</h3>
+<input id="newUser" placeholder="Username"/>
+<input id="newPass" placeholder="Password" type="password"/>
+<select id="newRole">
+<option value="operator">Operator</option>
+<option value="admin">Admin</option>
+</select>
+<button id="btnDoSignup">Create Account</button>
+<div class="switch">Already have an account? <a href="#" onclick="showLogin()">Log In</a></div>
+</div>
+</div>
+</section>
+<!-- ADMIN / BUY LICENSE -->
+<section id="adminUI" style="display:none">
+<div class="stack">
+<div class="card">
+<h3 style="margin-top:0">Buy License</h3>
+<p>Generate a code after purchasing a plan.</p>
+<button onclick="generateLicense()">Generate License Code</button>
+<pre id="licenseOut" style="white-space:pre-wrap;background:#f6f6f8;padding:10px;border-radius:8px;overflow:auto"></pre>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Your Licenses</h3>
+<button onclick="loadLicenses()">Refresh</button>
+<pre id="licenses" style="white-space:pre-wrap;background:#f6f6f8;padding:10px;border-radius:8px;overflow:auto"></pre>
+</div>
+</div>
+</section>
+<script>
+  // ===== Config =====
+  const API_BASE = localStorage.getItem('API_BASE') || ''; // e.g. '/api' or 'https://yourdomain.com/api'
+  let token = localStorage.getItem('token') || null;
+  let pendingBuy = false;
+
+  // ===== Utilities =====
+  function setActive(navId){
+    document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+    const el = document.getElementById(navId);
+    if(el) el.classList.add('active');
+  }
+  function showNotif(msg, type='success'){
+    const n = document.getElementById('notif');
+    n.textContent = msg;
+    if(type==='error'){ n.style.background='#f8d7da'; n.style.color='#721c24'; }
+    else { n.style.background='#d4edda'; n.style.color='#155724'; }
+    n.style.display='block';
+    setTimeout(()=>{ n.style.display='none'; }, 3500);
+  }
+  async function api(path, options={}){
+    const url = API_BASE + path;
+    const headers = Object.assign({'Content-Type':'application/json'}, options.headers||{});
+    if(token) headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(url, Object.assign({}, options, {headers}));
+    if(!res.ok){
+      let msg = await res.text();
+      try{ msg = JSON.parse(msg) }catch{}
+      throw msg;
+    }
+    const txt = await res.text();
+    try{ return JSON.parse(txt) }catch{ return txt }
+  }
+
+  // ===== Section Show/Hide =====
+  function hideAll(){
+    document.querySelectorAll('section').forEach(sec=>{
+      sec.classList.remove('active');
+      sec.style.display='none';
+    });
+    document.getElementById('btnLogout').style.display = token ? 'inline-block':'none';
+  }
+  function showHome(){
+    hideAll();
+    document.getElementById('home').style.display='block';
+    requestAnimationFrame(()=>document.getElementById('home').classList.add('active'));
+    setActive('btnHome');
+  }
+  function showLogin(){
+    hideAll();
+    document.getElementById('authSection').style.display='flex';
+    document.getElementById('login').style.display='block';
+    document.getElementById('signup').style.display='none';
+    // animate
+    document.getElementById('login').classList.remove('active');
+    requestAnimationFrame(()=>document.getElementById('login').classList.add('active'));
+    document.getElementById('authSection').classList.add('active');
+    setActive('btnLogin');
+  }
+  function showSignup(){
+    hideAll();
+    document.getElementById('authSection').style.display='flex';
+    document.getElementById('login').style.display='none';
+    document.getElementById('signup').style.display='block';
+    // animate
+    document.getElementById('signup').classList.remove('active');
+    requestAnimationFrame(()=>document.getElementById('signup').classList.add('active'));
+    document.getElementById('authSection').classList.add('active');
+    setActive('btnSignup');
+  }
+  function showAdmin(){
+    if(!token){
+      pendingBuy = true;
+      return showLogin();
+    }
+    hideAll();
+    document.getElementById('adminUI').style.display='block';
+    requestAnimationFrame(()=>document.getElementById('adminUI').classList.add('active'));
+    setActive('btnBuy');
+  }
+
+  // ===== Auth Actions =====
+  document.getElementById('btnDoLogin').addEventListener('click', async ()=>{
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value;
+    try{
+      const r = await api('/login', {method:'POST', body:JSON.stringify({username:u, password:p})});
+      token = r.token || r.accessToken || r; // be liberal in what we accept
+      localStorage.setItem('token', token);
+      showNotif('✅ Logged in successfully.');
+      showAdmin();
+      if(pendingBuy){
+        // Scroll to buy section if needed
+        pendingBuy = false;
+      }
+      loadLicenses();
+    }catch(e){
+      showNotif('❌ Login failed: ' + (e.message || JSON.stringify(e)), 'error');
+    }
+  });
+
+  document.getElementById('btnDoSignup').addEventListener('click', async ()=>{
+    const u = document.getElementById('newUser').value.trim();
+    const p = document.getElementById('newPass').value;
+    const role = document.getElementById('newRole').value;
+    try{
+      await api('/signup', {method:'POST', body:JSON.stringify({username:u, password:p, role})});
+      showNotif('✅ Account created successfully. You can now log in.');
+      showLogin();
+    }catch(e){
+      showNotif('❌ Signup failed: ' + (e.message || JSON.stringify(e)), 'error');
+    }
+  });
+
+  function logout(){
+    token = null;
+    localStorage.removeItem('token');
+    showHome();
+    showNotif('✅ You have logged out. Returning to Home…');
+  }
+
+  // ===== License helpers =====
+  async function loadLicenses(){
+    try{
+      const r = await api('/licenses', {method:'GET'});
+      document.getElementById('licenses').textContent = typeof r==='string'? r : JSON.stringify(r,null,2);
+    }catch(e){
+      document.getElementById('licenses').textContent = 'Unable to load licenses: ' + (e.message || JSON.stringify(e));
+    }
+  }
+  async function generateLicense(){
+    try{
+      const r = await api('/buy-license', {method:'POST', body:JSON.stringify({plan:'basic'})});
+      document.getElementById('licenseOut').textContent = typeof r==='string'? r : JSON.stringify(r,null,2);
+      loadLicenses();
+    }catch(e){
+      document.getElementById('licenseOut').textContent = 'Failed to generate license: ' + (e.message || JSON.stringify(e));
+    }
+  }
+
+  // Init
+  (function init(){
+    if(token){ document.getElementById('btnLogout').style.display='inline-block'; }
+    showHome();
+  })();
+</script>
+
+<footer style="margin-top:40px;padding:16px;text-align:center;font-size:0.9em;color:#555;border-top:1px solid #eee;background:#f9f9fb">
+  © 2025 VLY PisoWiFi | Powered by VoloyPlatform
+</footer>
+</body>
+</html>
