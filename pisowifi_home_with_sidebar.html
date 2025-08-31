@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VLY PisoWiFi — Auth & License</title>
+  <style>
+    :root{
+      --primary:#0056b3;
+      --primary-dark:#003d80;
+      --bg:#ffffff;
+      --fg:#222222;
+      --sidebar-bg:#1e1e2d;
+      --sidebar-fg:#ffffff;
+    }
+    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    .navbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#f7f7f9;border-bottom:1px solid #e6e6ee}
+    .nav-links a{margin:0 6px;padding:8px 12px;border-radius:6px;text-decoration:none;color:var(--primary)}
+    .nav-links a.active{background:var(--primary);color:#fff}
+    button{cursor:pointer;background:var(--primary);color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:600;transition:.2s}
+    button:hover{background:var(--primary-dark)}
+    section{display:none;opacity:0;transition:opacity .4s}
+    section.active{display:block;opacity:1}
+    .hero{text-align:center;padding:40px 16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:24px auto;max-width:1000px;padding:0 16px}
+    .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:18px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+    #authSection{display:none;align-items:center;justify-content:center;min-height:calc(100vh - 100px)}
+    #authSection input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:8px 0}
+    #authSection button{width:100%;margin-top:10px}
+    #notif{display:none;position:fixed;top:0;left:0;right:0;padding:12px;font-weight:700;text-align:center;z-index:1000}
+    footer{margin-top:40px;padding:16px;text-align:center;font-size:0.9em;color:#555;border-top:1px solid #eee;background:#f9f9fb}
+
+    /* Sidebar */
+    .layout { display:flex; min-height:calc(100vh - 60px); }
+    .sidebar {
+      width:230px;
+      background:var(--sidebar-bg);
+      color:var(--sidebar-fg);
+      padding:20px 0;
+      display:none;
+      flex-direction:column;
+    }
+    .sidebar h2 {
+      text-align:center;
+      margin:0 0 20px;
+      font-size:1.2em;
+    }
+    .menu a {
+      display:block;
+      padding:12px 20px;
+      color:var(--sidebar-fg);
+      text-decoration:none;
+      transition:.2s;
+    }
+    .menu a:hover, .menu a.active {
+      background:#33334d;
+    }
+    .content { flex:1; padding:20px; }
+  </style>
+</head>
+<body>
+  <div id="notif"></div>
+
+  <div class="navbar">
+    <div class="brand">VLY PisoWiFi</div>
+    <div class="nav-links">
+      <a href="#" id="btnHome" onclick="showHome()">Home</a>
+      <a href="#" id="btnLogin" onclick="showLogin()">Login</a>
+      <a href="#" id="btnSignup" onclick="showSignup()">Sign Up</a>
+      <a href="#" id="btnLogout" onclick="logout()" style="display:none">Logout</a>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section id="home" class="active">
+    <div class="hero">
+      <h2>Welcome to VLY PisoWiFi</h2>
+      <p>Fast Internet, Secure Access, Admin Control & Easy Payments.</p>
+      <p style="margin-top:20px;font-weight:bold;">
+        📱 My Cellular Number: 09356290856 <br>
+        📧 Email: kevinblaza816@gmail.com
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px;">
+        <button onclick="showLogin()">Login</button>
+        <button onclick="showSignup()">Sign Up</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>⚡ Fast Internet</h3><p>Enjoy reliable high-speed connectivity anytime.</p></div>
+      <div class="card"><h3>🔒 Secure Access</h3><p>Protect your network with token-based authentication.</p></div>
+      <div class="card"><h3>🛠️ Admin Control</h3><p>Manage users, licenses, and settings with ease.</p></div>
+      <div class="card"><h3>💳 Easy Payments</h3><p>Convenient and hassle-free license purchasing.</p></div>
+    </div>
+  </section>
+
+  <!-- AUTH -->
+  <section id="authSection">
+    <div style="width:100%;max-width:380px">
+      <div id="login" class="card">
+        <h3>Login</h3>
+        <input id="username" placeholder="Username" />
+        <input id="password" type="password" placeholder="Password" />
+        <button onclick="doLogin()">Login</button>
+        <div style="text-align:center;margin-top:10px">No account? <a href="#" onclick="showSignup()">Sign Up</a></div>
+      </div>
+      <div id="signup" class="card" style="display:none">
+        <h3>Sign Up</h3>
+        <input id="newUser" placeholder="Username" />
+        <input id="newPass" type="password" placeholder="Password" />
+        <button onclick="doSignup()">Create Account</button>
+        <div style="text-align:center;margin-top:10px">Have an account? <a href="#" onclick="showLogin()">Login</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP LAYOUT AFTER LOGIN -->
+  <div class="layout" id="appLayout" style="display:none">
+    <div class="sidebar">
+      <h2>Dashboard</h2>
+      <div class="menu">
+        <a href="#" onclick="showSection('dashboardUI')">Dashboard</a>
+        <a href="#" onclick="showSection('websiteUI')">Website</a>
+        <a href="#" onclick="showSection('machineUI')">Machine</a>
+        <a href="#" onclick="showSection('licenseUI')">License</a>
+        <a href="#" onclick="showSection('managementUI')">Management</a>
+        <a href="#" onclick="showSection('toolsUI')">Tools</a>
+        <a href="#" onclick="showSection('downloadUI')">Download</a>
+        <a href="#" onclick="showSection('settingsUI')">Settings</a>
+      </div>
+    </div>
+    <div class="content">
+      <section id="dashboardUI" class="active">
+        <h2>Dashboard</h2>
+        <p id="welcomeMsg"></p>
+        <p id="licenseCount"></p>
+      </section>
+      <section id="websiteUI"><h2>Website</h2><a href="https://example.com" target="_blank"><button>Go to Website</button></a></section>
+      <section id="machineUI"><h2>Machine</h2><p>✅ Machine Licensed Successfully.</p></section>
+      <section id="licenseUI"><h2>License</h2><button onclick="generateLicense()">Generate License</button><pre id="licenseOut"></pre><button onclick="loadLicenses()">Refresh</button><pre id="licenses"></pre></section>
+      <section id="managementUI"><h2>Management</h2><p>Manage users and system settings here.</p></section>
+      <section id="toolsUI"><h2>Tools</h2><p>Utilities and network tools will appear here.</p></section>
+      <section id="downloadUI"><h2>Download</h2><p>Access downloads and resources here.</p></section>
+      <section id="settingsUI"><h2>Account Settings</h2><input id="email" placeholder="Your Email" /><button onclick="saveEmail()">Save Email</button><br><br><input id="oldPass" type="password" placeholder="Old Password" /><input id="newPassChange" type="password" placeholder="New Password" /><button onclick="changePassword()">Change Password</button></section>
+    </div>
+  </div>
+
+  <footer>© 2025 VLY PisoWiFi | Powered by VoloyPlatform</footer>
+
+<script>
+  let currentUser = localStorage.getItem("sessionUser") || null;
+
+  function showNotif(msg,type="success"){
+    const n=document.getElementById("notif");
+    n.textContent=msg;
+    n.style.display="block";
+    n.style.background=type==="error"?"#f8d7da":"#d4edda";
+    n.style.color=type==="error"?"#721c24":"#155724";
+    setTimeout(()=>n.style.display="none",3000);
+  }
+
+  function showHome(){hideAll();document.getElementById("home").style.display="block";document.getElementById("home").classList.add("active");}
+  function showLogin(){hideAll();document.getElementById("authSection").style.display="flex";document.getElementById("login").style.display="block";document.getElementById("signup").style.display="none";document.getElementById("authSection").classList.add("active");}
+  function showSignup(){hideAll();document.getElementById("authSection").style.display="flex";document.getElementById("signup").style.display="block";document.getElementById("login").style.display="none";document.getElementById("authSection").classList.add("active");}
+
+  function showSection(id){
+    document.querySelectorAll(".content section").forEach(s=>s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    if(id==="dashboardUI"){loadDashboard();}
+    if(id==="licenseUI"){loadLicenses();}
+    if(id==="settingsUI"){loadSettings();}
+  }
+
+  function hideAll(){
+    document.querySelectorAll("section").forEach(s=>{s.classList.remove("active");s.style.display="none"});
+    document.getElementById("appLayout").style.display=currentUser?"flex":"none";
+    document.getElementById("btnLogout").style.display=currentUser?"inline-block":"none";
+  }
+
+  function doSignup(){
+    let u=document.getElementById("newUser").value.trim();
+    let p=document.getElementById("newPass").value;
+    if(!u||!p) return showNotif("❌ Fill all fields","error");
+    let users=JSON.parse(localStorage.getItem("users")||"{}");
+    if(users[u]) return showNotif("❌ Username already exists","error");
+    users[u]={pass:btoa(p),email:""};
+    localStorage.setItem("users",JSON.stringify(users));
+    showNotif("✅ Account created");
+    showLogin();
+  }
+
+  function doLogin(){
+    let u=document.getElementById("username").value.trim();
+    let p=document.getElementById("password").value;
+    let users=JSON.parse(localStorage.getItem("users")||"{}");
+    if(users[u] && users[u].pass===btoa(p)){
+      currentUser=u;
+      localStorage.setItem("sessionUser",u);
+      showNotif("✅ Logged in");
+      enterApp();
+    } else {
+      showNotif("❌ Invalid credentials","error");
+    }
+  }
+
+  function enterApp(){
+    hideAll();
+    document.getElementById("appLayout").style.display="flex";
+    showSection("dashboardUI");
+  }
+
+  function logout(){
+    currentUser=null;
+    localStorage.removeItem("sessionUser");
+    showHome();
+    showNotif("✅ Logged out");
+  }
+
+  function generateLicense(){
+    if(!currentUser) return;
+    let licenses=JSON.parse(localStorage.getItem("licenses")||"{}");
+    if(!licenses[currentUser]) licenses[currentUser]=[];
+    let code="LIC-"+Math.random().toString(36).substring(2,10).toUpperCase();
+    licenses[currentUser].push(code);
+    localStorage.setItem("licenses",JSON.stringify(licenses));
+    document.getElementById("licenseOut").textContent=code;
+    loadLicenses();
+  }
+
+  function loadLicenses(){
+    if(!currentUser) return;
+    let licenses=JSON.parse(localStorage.getItem("licenses")||"{}");
+    document.getElementById("licenses").textContent=JSON.stringify(licenses[currentUser]||[],null,2);
+  }
+
+  function saveEmail(){
+    let email=document.getElementById("email").value.trim();
+    if(!email) return showNotif("❌ Enter a valid email","error");
+    let users=JSON.parse(localStorage.getItem("users")||"{}");
+    if(users[currentUser]){
+      users[currentUser].email=email;
+      localStorage.setItem("users",JSON.stringify(users));
+      showNotif("✅ Email saved");
+    }
+  }
+
+  function loadSettings(){
+    let users=JSON.parse(localStorage.getItem("users")||"{}");
+    if(users[currentUser]){
+      document.getElementById("email").value = users[currentUser].email || "";
+    }
+  }
+
+  function changePassword(){
+    let oldPass=document.getElementById("oldPass").value;
+    let newPass=document.getElementById("newPassChange").value;
+    let users=JSON.parse(localStorage.getItem("users")||"{}");
+    if(users[currentUser] && users[currentUser].pass===btoa(oldPass)){
+      users[currentUser].pass=btoa(newPass);
+      localStorage.setItem("users",JSON.stringify(users));
+      showNotif("✅ Password changed");
+    } else {
+      showNotif("❌ Old password incorrect","error");
+    }
+  }
+
+  function loadDashboard(){
+    if(!currentUser) return;
+    document.getElementById("welcomeMsg").textContent="Welcome, "+currentUser+"!";
+    let licenses=JSON.parse(localStorage.getItem("licenses")||"{}");
+    let count=(licenses[currentUser]||[]).length;
+    document.getElementById("licenseCount").textContent="You have "+count+" license(s).";
+  }
+
+  (function init(){
+    if(currentUser){ enterApp(); }
+    else { showHome(); }
+  })();
+</script>
+</body>
+</html>
